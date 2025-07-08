@@ -1,0 +1,144 @@
+<!DOCTYPE html>
+<html lang="pl">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Panel Dźwięków</title>
+  <style>
+    body {
+      background-color: black;
+      color: white;
+      font-family: Arial, sans-serif;
+      margin: 0;
+      padding: 0;
+      height: 100vh;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      align-items: center;
+    }
+
+    .grid {
+      display: grid;
+      grid-template-columns: repeat(3, 100px);
+      gap: 20px;
+      margin-top: 50px;
+    }
+
+    .button {
+      width: 100px;
+      height: 100px;
+      background-color: yellow;
+      color: black;
+      font-weight: bold;
+      font-size: 16px;
+      border: none;
+      cursor: pointer;
+      border-radius: 8px;
+      box-shadow: 0 4px 8px rgba(0,0,0,0.3);
+    }
+
+    .settings {
+      position: fixed;
+      top: 10px;
+      right: 10px;
+      background-color: #222;
+      padding: 10px;
+      border-radius: 8px;
+    }
+
+    .settings select,
+    .settings input[type="file"],
+    .settings button {
+      display: block;
+      margin-bottom: 8px;
+      font-size: 14px;
+    }
+
+    .settings button {
+      padding: 6px 12px;
+      background-color: yellow;
+      border: none;
+      cursor: pointer;
+      font-weight: bold;
+      border-radius: 4px;
+    }
+  </style>
+</head>
+<body>
+
+  <div class="settings">
+    <label for="soundSelector">Wybierz przycisk:</label>
+    <select id="soundSelector">
+      <option value="dzwiek1">Dźwięk 1</option>
+      <option value="dzwiek2">Dźwięk 2</option>
+      <option value="dzwiek3">Dźwięk 3</option>
+      <option value="dzwiek4">Dźwięk 4</option>
+      <option value="dzwiek5">Dźwięk 5</option>
+      <option value="dzwiek6">Dźwięk 6</option>
+    </select>
+    <input type="file" id="fileInput" accept="audio/*" />
+    <button onclick="saveSound()">Zapisz</button>
+  </div>
+
+  <div class="grid">
+    <button class="button" id="dzwiek1">Dźwięk 1</button>
+    <button class="button" id="dzwiek2">Dźwięk 2</button>
+    <button class="button" id="dzwiek3">Dźwięk 3</button>
+    <button class="button" id="dzwiek4">Dźwięk 4</button>
+    <button class="button" id="dzwiek5">Dźwięk 5</button>
+    <button class="button" id="dzwiek6">Dźwięk 6</button>
+  </div>
+
+  <script>
+    const soundMap = {};
+
+    // Wczytaj dźwięki z localStorage przy starcie
+    window.onload = () => {
+      for (let i = 1; i <= 6; i++) {
+        const key = 'dzwiek' + i;
+        const dataUrl = localStorage.getItem(key);
+        if (dataUrl) {
+          soundMap[key] = new Audio(dataUrl);
+        }
+      }
+    };
+
+    // Obsługa kliknięcia przycisku
+    document.querySelectorAll('.button').forEach(button => {
+      button.addEventListener('click', () => {
+        const id = button.id;
+        const audio = soundMap[id];
+        if (audio) {
+          audio.currentTime = 0;
+          audio.play();
+        } else {
+          alert('Brak przypisanego dźwięku.');
+        }
+      });
+    });
+
+    // Zapis pliku dźwiękowego
+    function saveSound() {
+      const selectedButton = document.getElementById('soundSelector').value;
+      const fileInput = document.getElementById('fileInput');
+      const file = fileInput.files[0];
+
+      if (!file) {
+        alert('Nie wybrano pliku.');
+        return;
+      }
+
+      const reader = new FileReader();
+      reader.onload = function (e) {
+        const dataUrl = e.target.result;
+        localStorage.setItem(selectedButton, dataUrl);
+        soundMap[selectedButton] = new Audio(dataUrl);
+        alert('Dźwięk zapisany dla: ' + selectedButton);
+      };
+      reader.readAsDataURL(file);
+    }
+  </script>
+
+</body>
+</html>
